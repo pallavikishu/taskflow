@@ -1,0 +1,27 @@
+name: Deploy to EC2
+
+# Manually triggered from the Actions tab, or wire this to run on:
+#   push:
+#     branches: [main]
+# once you have an EC2 host and the secrets below configured.
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy via SSH
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/taskflow
+            git pull origin main
+            docker compose down
+            docker compose up -d --build
